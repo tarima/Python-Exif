@@ -1,20 +1,17 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 
+import os
+import webapp2
+
+from google.appengine.ext.webapp import template
 from PIL import Image
 from PIL.ExifTags import TAGS, GPSTAGS
 
-import webapp2
-
-def indexHandler(request):
-    response ='''<html><body>
-  <form action="/upload" method="POST" enctype="multipart/form-data">
-  <input type="file" name="file">
-  <input type="submit" name="submit" value="アップロード">
-  </form>
-  </body></html>
-  '''
-    return webapp2.Response(response)
+class MainPage(webapp2.RequestHandler):
+  def get(self):
+    path = os.path.join(os.path.dirname(__file__), './maps_template.html')
+    self.response.out.write(template.render(path, 0))
 
 # PIL.ExifTagsのTAGSとGPSTAGSを使用してExifで取得可能な全データを取得する
 # TAGSとGPSTAGSについてはURL参照　
@@ -137,6 +134,6 @@ def uploadHandler(request):
 
 
 app = webapp2.WSGIApplication([
-    ('/', indexHandler),
+    ('/maps', MainPage),
     ('/upload', uploadHandler)
     ],debug=True)
