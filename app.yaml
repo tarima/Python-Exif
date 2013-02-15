@@ -10,13 +10,13 @@ handlers:
   upload: favicon\.ico
 
 - url: /maps
-  script: main.app
+  script: src.main.app
   
 - url: /upload
-  script: main.app
+  script: src.main.app
 
 - url: /.*
-  script: helloworld.app
+  script: src.helloworld.app
 
 libraries:
 - name: webapp2
