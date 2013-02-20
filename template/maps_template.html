@@ -21,6 +21,17 @@
             };
             var infowindow = new google.maps.InfoWindow(iwopts);
             infowindow.open(map);
+            var markerOpts = {
+                position : latlng,
+		map : map
+            }
+	    var marker = new google.maps.Marker(markerOpts);
+	    infowindow = new google.maps.InfoWindow(iwopts);
+	   // 以下だとなぜか情報Windowがひらかない。。。
+	   //infowindow.open(map);
+	   google.maps.event.addListener(marker, "click", function(){
+	        infowindow.open(map, marker);
+           });
         }
         //-->
         </script>
