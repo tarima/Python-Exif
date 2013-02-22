@@ -9,7 +9,7 @@
             var element = document.getElementById("map");
             var latlng = new google.maps.LatLng(31.579667,130.545833);
             var options = {
-                zoom: 12,
+                zoom: 15,
                 center: latlng,
                 mapTypeId: google.maps.MapTypeId.ROADMAP
             };
@@ -23,6 +23,7 @@
             infowindow.open(map);
             var markerOpts = {
                 position : latlng,
+                animation: google.maps.Animation.BOUNCE,
 		map : map
             }
 	    var marker = new google.maps.Marker(markerOpts);
