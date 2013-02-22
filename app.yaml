@@ -8,7 +8,10 @@ handlers:
 - url: /favicon\.ico
   static_files: favicon.ico
   upload: favicon\.ico
-
+  
+- url: /img
+  static_dir: img
+  
 - url: /maps
   script: src.main.app
   
