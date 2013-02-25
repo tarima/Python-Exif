@@ -2,16 +2,13 @@
 # -*- coding: utf-8 -*-
 
 import os
+import glob
+import logging
 import webapp2
 
 from google.appengine.ext.webapp import template
 from PIL import Image
 from PIL.ExifTags import TAGS, GPSTAGS
-
-class MainPage(webapp2.RequestHandler):
-  def get(self):
-    path = os.path.join(os.path.dirname(__file__), '../template/maps_template.html')
-    self.response.out.write(template.render(path, 0))
 
 # PIL.ExifTagsのTAGSとGPSTAGSを使用してExifで取得可能な全データを取得する
 # TAGSとGPSTAGSについてはURL参照　
@@ -89,6 +86,55 @@ def get_lat_lon(exif_data):
             if gps_longitude_ref != "E":
                 lon = 0 - lon
     return lat, lon
+
+class MainPage(webapp2.RequestHandler):
+  def get(self):
+    logging.getLogger().setLevel(logging.DEBUG)
+
+    imgDir = os.path.join(os.path.dirname(__file__), '../img/')
+    # パス内の全てのJpegファイルの絶対パスを要素とするリストを返す
+    imgFiles = glob.glob(os.path.join(imgDir,"*.jpg"))#とりあえずjpg限定
+    logging.debug(imgFiles)
+
+    # 画像情報のリスト作成
+    imgList = []
+
+    for imageFile in imgFiles:
+        image = Image.open(imageFile)
+        # 画像の全Exif取得
+        exif_data = get_exif_data(image)
+        # 撮影日時の取得
+        datetime = exif_data["DateTimeOriginal"]
+        # 経度緯度の取得
+        lat,lon = get_lat_lon(exif_data)
+        # 画像情報のディクショナリ作成
+        image_info = {
+            'imgpath': imageFile,
+            'datetime': datetime,
+            'lat': lat,
+            'lon': lon
+        }
+        logging.debug(image_info)
+        imgList.append(image_info)
+
+    # テンプレートのJS部分に渡すディクショナリ生成
+    template_values = {
+        'imgList': imgList,
+    }
+    # テンプレートのJS部分をレンダリング
+    mapsJsPath = os.path.join(os.path.dirname(__file__), '../template/maps_js.html')
+    mapsjs = template.render(mapsJsPath, template_values)
+
+    # テンプレートの地図部分に渡すディクショナリ生成
+    template_values = {
+        'mapsjs': mapsjs,
+        'imgFiles': imgFiles,
+        'imgList': imgList,
+    }
+
+    # テンプレートの地図部分をレンダリング
+    mapsTempatePath = os.path.join(os.path.dirname(__file__), '../template/maps_template.html')
+    self.response.out.write(template.render(mapsTempatePath, template_values))
 
 def uploadHandler(request):
     file_io = request.POST['file'].file

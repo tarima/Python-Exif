@@ -1,45 +1,9 @@
 <html>
 <head>
-	<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
 	<title>Omoshiro App</title>
 	<script type="text/javascript" src="http://maps.google.com/maps/api/js?sensor=false"></script>
-	<script type="text/javascript">
-	<!--
-        function init(){
-            var element = document.getElementById("map");
-            var latlng = new google.maps.LatLng(31.579667,130.545833);
-            var options = {
-                zoom: 15,
-                center: latlng,
-                mapTypeId: google.maps.MapTypeId.ROADMAP
-            };
-            var map = new google.maps.Map(element, options);
-
-            var contentStr = '<div>有馬君が小さい春をみつけたよ</div><br>' +
-                             '<a href="/img/exif_small.JPG">' +
-                             '<img src="/img/exif_small.JPG" align="left">' +
-                             '</a></div>';
-            var iwopts = {
-		content: contentStr,
-            	positon: latlng
-            };
-            var infowindow = new google.maps.InfoWindow(iwopts);
-            infowindow.open(map);
-            var markerOpts = {
-                position : latlng,
-                animation: google.maps.Animation.BOUNCE,
-		map : map
-            }
-	    var marker = new google.maps.Marker(markerOpts);
-	    infowindow = new google.maps.InfoWindow(iwopts);
-	   // 以下だとなぜか情報Windowがひらかない。。。
-	   //infowindow.open(map);
-	   google.maps.event.addListener(marker, "click", function(){
-	        infowindow.open(map, marker);
-           });
-        }
-        //-->
-        </script>
+	{{ mapsjs }}
 </head>
 <body onload="init();">
 	<h1>Omoshiro App</h1>
@@ -48,5 +12,10 @@
 		<input type="submit" name="submit" value="アップロード2">
 	</form>
 	<div id="map" style="width:300px; height:300px;"></div>
+
+	{% for image in imgList %}
+		{{image.imgpath}}
+		<br>
+	{% endfor %}
 </body>
 </html>

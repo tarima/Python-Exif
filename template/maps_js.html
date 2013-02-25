@@ -1,0 +1,74 @@
+<!-- -*- coding: utf-8 -*- -->
+<script type="text/javascript">	
+
+// 情報ウィンドウオブジェクト
+var infowindow;
+var map;
+
+// 情報ウィンドウ表示
+function showInfoWindow(marker, iwopts){
+	// // 以下だとなぜか情報Windowがひらかない。。。
+	// //infowindow.open(map);
+	google.maps.event.addListener(marker, 'click', function() {
+		// 既に開かれていたらそっ閉じ(情報ウィンドウの表示は1つにする)
+		if(infowindow) infowindow.close();
+		infowindow = new google.maps.InfoWindow(iwopts);
+		infowindow.open(map, marker);
+	});
+}
+
+function init(){
+	// 地図オブジェクト用配列
+	var mapObjArray = new Array();
+	// 地図マーカー用配列
+	var markerArray = new Array();
+	// 吹き出し情報用配列
+	var iwopts = new Array();
+	// 撮影日時用配列
+	var dateTimeArray = new Array();
+	// 画像パス用配列
+	var imgPathArray = new Array();
+
+	{% for image in imgList %}
+		// 緯度・経度
+		mapObjArray.push(new google.maps.LatLng({{image.lat}}, {{image.lon}}));
+		dateTimeArray.push("{{image.datetime}}");
+		imgPathArray.push("{{image.imgpath}}");
+	{% endfor %}
+
+	// 地図オプション設定
+	var options = {
+		zoom: 12,	// ズームレベル
+		center: mapObjArray[0],	// 地図の中心。とりあえず最初に読み込んだ画像の場所にしておく
+					// ここが適当で良いなら最初のループは不要になる
+		mapTypeId: google.maps.MapTypeId.ROADMAP // 地図タイプ
+	};
+	// 地図オブジェクト生成
+	map = new google.maps.Map(document.getElementById("map"), options);
+
+	// {% for image in imgList %}
+	for (i = 0; i < mapObjArray.length; i++) {
+		// マーカーオプション設定
+		markerArray[i] = new google.maps.Marker({
+			position : mapObjArray[i],			//マーカーの位置。centerが適当でよいならmapObjArray配列は不要になる。
+			animation: google.maps.Animation.BOUNCE,	//はねるやつ。現在唯一のおもしろ要素
+			map : map,					// 地図オブジェクト
+			// title:"タイトル"				// タイトルも付けられるっぽい
+		});
+		var contentStr = 
+			'<div>有馬君が小さい春をみつけたよ</div><br>' +
+			dateTimeArray[i] + '<br>' +
+			'<a href="' + imgPathArray[i] + '">' +
+			'<img src="' + imgPathArray[i] + '" align="left">' +
+			'</a></div>';
+		// 情報ウィンドウに表示させる内容
+		iwopts[i] = {
+			content: contentStr,
+			positon: mapObjArray[i],
+		};
+		showInfoWindow(markerArray[i], iwopts[i]);
+	}
+	// {% endfor %}
+}
+
+</script>
