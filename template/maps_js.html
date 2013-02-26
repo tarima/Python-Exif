@@ -46,13 +46,12 @@ function init(){
 	// 地図オブジェクト生成
 	map = new google.maps.Map(document.getElementById("map"), options);
 
-	// {% for image in imgList %}
 	for (i = 0; i < mapObjArray.length; i++) {
 		// マーカーオプション設定
 		markerArray[i] = new google.maps.Marker({
 			position : mapObjArray[i],			//マーカーの位置。centerが適当でよいならmapObjArray配列は不要になる。
 			animation: google.maps.Animation.BOUNCE,	//はねるやつ。現在唯一のおもしろ要素
-			map : map,					// 地図オブジェクト
+			map : map					// 地図オブジェクト
 			// title:"タイトル"				// タイトルも付けられるっぽい
 		});
 		var contentStr = 
@@ -64,11 +63,10 @@ function init(){
 		// 情報ウィンドウに表示させる内容
 		iwopts[i] = {
 			content: contentStr,
-			positon: mapObjArray[i],
+			positon: mapObjArray[i]
 		};
 		showInfoWindow(markerArray[i], iwopts[i]);
 	}
-	// {% endfor %}
 }
 
 </script>
