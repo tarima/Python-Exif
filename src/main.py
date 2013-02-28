@@ -91,16 +91,23 @@ class MainPage(webapp2.RequestHandler):
   def get(self):
     logging.getLogger().setLevel(logging.DEBUG)
 
-    imgDir = os.path.join(os.path.dirname(__file__), '../img/')
+    imgDir = os.path.join(os.path.dirname(__file__), '..\\imgs')
+    # imgDir = '..\\img'
+    logging.debug(imgDir)
     # パス内の全てのJpegファイルの絶対パスを要素とするリストを返す
-    imgFiles = glob.glob(os.path.join(imgDir,"*.jpg"))#とりあえずjpg限定
+    #imgFiles = glob.glob(os.path.join(imgDir,"*.jpg"))#とりあえずjpg限定
+    current = os.getcwd() + '\\imgs\\'
+    logging.debug(current)
+    imgFiles = os.listdir(current)
+    #imgFiles = glob.glob('*.jpg')#とりあえずjpg限定
     logging.debug(imgFiles)
 
     # 画像情報のリスト作成
     imgList = []
 
     for imageFile in imgFiles:
-        image = Image.open(imageFile)
+        image = Image.open(current + imageFile)
+        logging.debug(current + imageFile) 
         # 画像の全Exif取得
         exif_data = get_exif_data(image)
         # 撮影日時の取得
@@ -109,7 +116,7 @@ class MainPage(webapp2.RequestHandler):
         lat,lon = get_lat_lon(exif_data)
         # 画像情報のディクショナリ作成
         image_info = {
-            'imgpath': imageFile,
+            'imgpath': 'img/' + imageFile,
             'datetime': datetime,
             'lat': lat,
             'lon': lon

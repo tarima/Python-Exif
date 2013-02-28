@@ -15,6 +15,9 @@ handlers:
 - url: /upload
   script: src.main.app
 
+- url: /img
+  static_dir: img
+
 - url: /.*
   script: src.helloworld.app
 
