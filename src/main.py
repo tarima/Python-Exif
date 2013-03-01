@@ -91,12 +91,12 @@ class MainPage(webapp2.RequestHandler):
   def get(self):
     logging.getLogger().setLevel(logging.DEBUG)
 
-    imgDir = os.path.join(os.path.dirname(__file__), '..\\imgs')
+    imgDir = os.path.join(os.path.dirname(__file__), '../imgs')
     # imgDir = '..\\img'
     logging.debug(imgDir)
     # パス内の全てのJpegファイルの絶対パスを要素とするリストを返す
     #imgFiles = glob.glob(os.path.join(imgDir,"*.jpg"))#とりあえずjpg限定
-    current = os.getcwd() + '\\imgs\\'
+    current = os.getcwd() + '/src/imgs/'
     logging.debug(current)
     imgFiles = os.listdir(current)
     #imgFiles = glob.glob('*.jpg')#とりあえずjpg限定
