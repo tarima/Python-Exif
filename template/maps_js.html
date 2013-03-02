@@ -28,12 +28,15 @@ function init(){
 	var dateTimeArray = new Array();
 	// 画像パス用配列
 	var imgPathArray = new Array();
+	// 画像タイトル用配列
+	var imgTitleArray = new Array();
 
 	{% for image in imgList %}
 		// 緯度・経度
 		mapObjArray.push(new google.maps.LatLng({{image.lat}}, {{image.lon}}));
 		dateTimeArray.push("{{image.datetime}}");
 		imgPathArray.push("{{image.imgpath}}");
+		imgTitleArray.push("{{image.imgtilte}}");
 	{% endfor %}
 
 	// 地図オプション設定
@@ -51,14 +54,14 @@ function init(){
 		markerArray[i] = new google.maps.Marker({
 			position : mapObjArray[i],			//マーカーの位置。centerが適当でよいならmapObjArray配列は不要になる。
 			animation: google.maps.Animation.BOUNCE,	//はねるやつ。現在唯一のおもしろ要素
-			map : map					// 地図オブジェクト
-			// title:"タイトル"				// タイトルも付けられるっぽい
+			map : map,					// 地図オブジェクト
+			title:'金沢日記'				// タイトルも付けられるっぽい
 		});
 		var contentStr = 
-			'<div>有馬君が小さい春をみつけたよ</div><br>' +
-			dateTimeArray[i] + '<br>' +
-			'<a href="' + imgPathArray[i] + '">' +
-			'<img src="' + imgPathArray[i] + '" align="left">' +
+			dateTimeArray[i] + ' ' +
+			imgTitleArray[i] + '<br>' +
+			'<a href="' + imgPathArray[i] + '" Target="_blank">' +
+			'<img src="' + imgPathArray[i] + '" Width="73.5" Height="98" align="left">' +
 			'</a></div>';
 		// 情報ウィンドウに表示させる内容
 		iwopts[i] = {

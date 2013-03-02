@@ -102,12 +102,13 @@ class MainPage(webapp2.RequestHandler):
     #imgFiles = glob.glob('*.jpg')#とりあえずjpg限定
     logging.debug(imgFiles)
 
+    imgTitle = '金沢写真'
     # 画像情報のリスト作成
     imgList = []
 
-    for imageFile in imgFiles:
-        image = Image.open(current + imageFile)
-        logging.debug(current + imageFile) 
+    for imgFile in imgFiles:
+        image = Image.open(current + imgFile)
+        logging.debug(current + imgFile) 
         # 画像の全Exif取得
         exif_data = get_exif_data(image)
         # 撮影日時の取得
@@ -116,10 +117,11 @@ class MainPage(webapp2.RequestHandler):
         lat,lon = get_lat_lon(exif_data)
         # 画像情報のディクショナリ作成
         image_info = {
-            'imgpath': 'img/' + imageFile,
+            'imgpath': 'img/' + imgFile,
             'datetime': datetime,
             'lat': lat,
-            'lon': lon
+            'lon': lon,
+            'imgtilte': imgTitle
         }
         logging.debug(image_info)
         imgList.append(image_info)
