@@ -5,6 +5,7 @@ import os
 import glob
 import logging
 import webapp2
+import datetime
 
 from google.appengine.ext.webapp import template
 from PIL import Image
@@ -91,18 +92,26 @@ def getImgFiles():
 
     return imgFiles
 
+# 日時フォーマット変換
+def changeDateTimeFormat(exifDateTime):
+
+    # YYYY:MM:DD hh:mm:ss --> WWW MMM DD hh:mm:ss YYYY
+    tmp = exifDateTime.replace(" ", ":")
+    params = tmp.split(":")
+    dt = datetime.datetime(int(params[0]), int(params[1]), int(params[2]), 
+                          int(params[3]), int(params[4]), int(params[5]))
+    return dt.ctime()
+
 # イメージリスト取得
 def getImgList(imgFiles):
     imgList = []
     imgTitle = "金沢日記"
     imgPath = getImgPath()
-    cnt = 0
 
     for imgFile in imgFiles:
-    cnt += 1
         image = Image.open(imgPath + imgFile)
         exifData = getExifData(image)                   # Exifデータ取得
-        datetime = getKeyData(exifData, EXIFDATETIME)   # 日時取得
+        datetime = changeDateTimeFormat(getKeyData(exifData, EXIFDATETIME))   # 日時取得
         lat,lon = getLatAndLon(exifData)                # 位置取得
         # 画像情報のディクショナリ作成
         imageInfo = {
@@ -110,7 +119,7 @@ def getImgList(imgFiles):
             "datetime": datetime,
             "lat": lat,
             "lon": lon,
-            "imgtilte": imgTitle + " ("  + str(cnt) + ")"
+            "imgtilte": imgTitle + " ("  + str(imgFiles.index(imgFile) + 1) + ")"
         }
         logging.debug(imageInfo)
         imgList.append(imageInfo)
