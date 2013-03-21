@@ -17,6 +17,11 @@ EXIFGPSLAT = "GPSLatitude"
 EXIFGPSLATREF = "GPSLatitudeRef"
 EXIFGPSLON = "GPSLongitude"
 EXIFGPSLONREF = "GPSLongitudeRef"
+DYNAMIC_IMG_PATH = "/src/imgs/"
+IMG_DIR = "img/"
+IMG_TITLE = "金沢日記"
+JS_TEMPLATE_PATH = "../template/maps_js.html"
+MAPS_TEMPLATE_PATH = "../template/maps_template.html"
 
 # PIL.ExifTagsのTAGSとGPSTAGSを使用してExifで取得可能な全データを取得する
 def getExifData(image):
@@ -83,7 +88,7 @@ def getLatAndLon(exifData):
 
 # イメージファイルのパスを取得
 def getImgPath():
-    return os.getcwd() + "/src/imgs/"
+    return os.getcwd() + DYNAMIC_IMG_PATH
 
 # イメージファイルを取得
 def getImgFiles():
@@ -105,7 +110,7 @@ def changeDateTimeFormat(exifDateTime):
 # イメージリスト取得
 def getImgList(imgFiles):
     imgList = []
-    imgTitle = "金沢日記"
+    imgTitle = IMG_TITLE
     imgPath = getImgPath()
 
     for imgFile in imgFiles:
@@ -115,7 +120,7 @@ def getImgList(imgFiles):
         lat,lon = getLatAndLon(exifData)                # 位置取得
         # 画像情報のディクショナリ作成
         imageInfo = {
-            "imgpath": "img/" + imgFile,
+            "imgpath": IMG_DIR + imgFile,
             "datetime": datetime,
             "lat": lat,
             "lon": lon,
@@ -149,27 +154,12 @@ class MainPage(webapp2.RequestHandler):
     imgFiles = getImgFiles()
     imgList = getImgList(imgFiles)
     # テンプレートのJS部分をレンダリング
-    mapsJsPath = os.path.join(os.path.dirname(__file__), "../template/maps_js.html")
+    mapsJsPath = os.path.join(os.path.dirname(__file__), JS_TEMPLATE_PATH)
     mapsJs = template.render(mapsJsPath, getTemplateJs(imgList))
     # テンプレートの地図部分をレンダリング
-    mapsTempatePath = os.path.join(os.path.dirname(__file__), "../template/maps_template.html")
+    mapsTempatePath = os.path.join(os.path.dirname(__file__), MAPS_TEMPLATE_PATH)
     self.response.out.write(template.render(mapsTempatePath, getTemplateMap(imgFiles, imgList, mapsJs)))
-
-def uploadHandler(request):
-    file_io = request.POST["file"].file
-    image = Image.open(file_io)
-
-    try:
-        exifData = getExifData(image)
-        dateTime = exifData[EXIFDATETIME]
-        lat, lon = getLatAndLon(exifData)
-        response = "(Lat,Lon) = (%f,%f),  Date = %s"  % (lat, lon, dateTime)
-        return webapp2.Response(response)
-    except:
-        return webapp2.Response("No GPS Information")
-
 
 app = webapp2.WSGIApplication([
     ("/maps", MainPage),
-    ("/upload", uploadHandler)
     ],debug=True)

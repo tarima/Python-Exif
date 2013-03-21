@@ -55,13 +55,12 @@ function createInfoViewContent(dateTime, imgTitle, imgPath) {
 
 function init(){
 	{% if imgList %}
-	createMapObj({{imgList.0.lat}}, {{imgList.0.lon}});
-	{% for image in imgList %}
-	showMarker({{image.lat}}, {{image.lon}}, "{{image.datetime}}", "{{image.imgtilte}}", "{{image.imgpath}}");
-	{% endfor %}
+		createMapObj({{imgList.0.lat}}, {{imgList.0.lon}});
+		{% for image in imgList %}
+			showMarker({{image.lat}}, {{image.lon}}, "{{image.datetime}}", "{{image.imgtilte}}", "{{image.imgpath}}");
+		{% endfor %}
 	{% else %}
-	Not Photo...
+		document.write("Not Photo...");
 	{% endif %}
 }
-
 </script>
