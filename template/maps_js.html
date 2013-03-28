@@ -57,7 +57,7 @@ function init(){
 	{% if imgList %}
 		createMapObj({{imgList.0.lat}}, {{imgList.0.lon}});
 		{% for image in imgList %}
-			showMarker({{image.lat}}, {{image.lon}}, "{{image.datetime}}", "{{image.imgtilte}}", "{{image.imgpath}}");
+			showMarker({{image.lat}}, {{image.lon}}, "{{image.datetime}}", "{{image.imgtitle}}", "{{image.imgpath}}");
 		{% endfor %}
 	{% else %}
 		document.write("Not Photo...");
