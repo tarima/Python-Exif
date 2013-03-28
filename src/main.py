@@ -6,6 +6,7 @@ import glob
 import logging
 import webapp2
 import datetime
+import dircache
 
 from google.appengine.ext.webapp import template
 from PIL import Image
@@ -92,7 +93,7 @@ def getImgPath():
 
 # イメージファイルを取得
 def getImgFiles():
-    imgFiles = os.listdir(getImgPath())
+    imgFiles = dircache.listdir(getImgPath())
     #logging.debug("images files:" + imgFiles)
 
     return imgFiles
