@@ -123,6 +123,8 @@ class ImageFile:
     def getImgList(cls, imgFiles):
         imgList = []
         imgPath = cls.getImgPath()
+        centerLat = 0
+        centerLon = 0;
 
         for imgFile in imgFiles:
             image = Image.open(imgPath + imgFile)
@@ -130,6 +132,8 @@ class ImageFile:
             datetime = cls.changeDateTimeFormat(Exif.getKeyData(exifData, EXIFDATETIME))    # 日時取得
             lat,lon = Exif.getLatAndLon(exifData)                                           # 位置取得
             imgTitle = Exif.getKeyData(exifData, EXIFIMAGEDESCRIPTION)                      # タイトル取得
+            centerLat += lat
+            centerLon += lon
             # 画像情報のディクショナリ作成
             imageInfo = {
                 "imgpath": IMG_DIR + imgFile,
@@ -141,13 +145,17 @@ class ImageFile:
             logging.debug(imageInfo)
             imgList.append(imageInfo)
 
-        return imgList
+        centerLat /= len(imgFiles)
+        centerLon /= len(imgFiles)
+        return imgList, centerLat, centerLon
 
     # テンプレートのJS部分に渡すディクショナリ生成
     @classmethod
-    def getTemplateJs(cls, imgList):
+    def getTemplateJs(cls, imgList, centerLat, centerLon):
         templateJsValues = {
             "imgList": imgList,
+            "centerLat": centerLat,
+            "centerLon": centerLon,
         }
         return templateJsValues
 
@@ -166,10 +174,10 @@ class MainPage(webapp2.RequestHandler):
     logging.getLogger().setLevel(logging.DEBUG)
 
     imgFiles = ImageFile.getImgFiles()
-    imgList = ImageFile.getImgList(imgFiles)
+    imgList, centerLat, centerLon = ImageFile.getImgList(imgFiles)
     # テンプレートのJS部分をレンダリング
     mapsJsPath = os.path.join(os.path.dirname(__file__), JS_TEMPLATE_PATH)
-    mapsJs = template.render(mapsJsPath, ImageFile.getTemplateJs(imgList))
+    mapsJs = template.render(mapsJsPath, ImageFile.getTemplateJs(imgList, centerLat, centerLon))
     # テンプレートの地図部分をレンダリング
     mapsTempatePath = os.path.join(os.path.dirname(__file__), MAPS_TEMPLATE_PATH)
     self.response.out.write(template.render(mapsTempatePath, ImageFile.getTemplateMap(imgFiles, imgList, mapsJs)))

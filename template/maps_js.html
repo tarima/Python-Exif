@@ -55,7 +55,7 @@ function createInfoViewContent(dateTime, imgTitle, imgPath) {
 
 function init(){
 	{% if imgList %}
-		createMapObj({{imgList.0.lat}}, {{imgList.0.lon}});
+		createMapObj({{centerLat}}, {{centerLon}});
 		{% for image in imgList %}
 			showMarker({{image.lat}}, {{image.lon}}, "{{image.datetime}}", "{{image.imgtitle}}", "{{image.imgpath}}");
 		{% endfor %}
