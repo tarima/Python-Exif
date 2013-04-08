@@ -96,6 +96,10 @@ class Exif:
 class ImageFiles:
     __centerLat = 0
     __centerLon = 0;
+    __east = 0;     # 東
+    __west = 300;   # 西
+    __south = 300;  # 南
+    __north = 0;    # 北
 
     # イメージファイルのパスを取得
     @classmethod
@@ -120,6 +124,37 @@ class ImageFiles:
                               int(params[3]), int(params[4]), int(params[5]))
         return dt.ctime()
 
+    # 画像情報のディクショナリ作成
+    @classmethod
+    def __getImageInfo(cls, imgFile, datetime, imgTitle, lat, lon):
+        imageInfoValues = {
+                "imgpath": IMG_DIR + imgFile,
+                "datetime": datetime,
+                "lat": lat,
+                "lon": lon,
+                "imgtitle": imgTitle
+        }
+        return imageInfoValues
+
+    # 東西南北の決定
+    @classmethod
+    def __getFourWinds(cls, lat, lon):
+        if(lat > cls.__north):
+            cls.__north = lat # 最北
+        if(lat < cls.__south):
+            cls.__south = lat # 最南
+        if(lon > cls.__east):
+            cls.__east = lon # 最東
+        if(lon < cls.__west):
+            cls.__west = lon # 最西
+
+    # 画像の中央位置を取得
+    @classmethod
+    def getCenter(cls):
+        cls.__centerLat = (cls.__north + cls.__south)/2
+        cls.__centerLon = (cls.__east + cls.__west)/2
+        return cls.__centerLat, cls.__centerLon
+
     # イメージリスト取得
     @classmethod
     def getImgList(cls, imgFiles):
@@ -132,31 +167,15 @@ class ImageFiles:
             # 画像位置情報の取得
             image = Image.open(imgPath + imgFile)
             exifData = Exif.getExifData(image)                                              # Exifデータ取得
-            datetime = cls.__changeDateTimeFormat(Exif.getKeyData(exifData, EXIFDATETIME))    # 日時取得
+            datetime = cls.__changeDateTimeFormat(Exif.getKeyData(exifData, EXIFDATETIME))  # 日時取得
             lat,lon = Exif.getLatAndLon(exifData)                                           # 位置取得
             imgTitle = Exif.getKeyData(exifData, EXIFIMAGEDESCRIPTION)                      # タイトル取得
-            # 画像情報のディクショナリ作成
-            imageInfo = {
-                "imgpath": IMG_DIR + imgFile,
-                "datetime": datetime,
-                "lat": lat,
-                "lon": lon,
-                "imgtitle": imgTitle
-            }
+            imageInfo = cls.__getImageInfo(imgFile, datetime, imgTitle, lat, lon)           # 画像情報のディクショナリ作成
             logging.debug(imageInfo)
             imgList.append(imageInfo)
-            # 画像中央位置の計算
-            centerLatCal += lat
-            centerLotCal += lon
-
-        cls.__centerLat = centerLatCal/len(imgFiles)
-        cls.__centerLon = centerLotCal/len(imgFiles)
+            # 東西南北の決定
+            cls.__getFourWinds(lat, lon)
         return imgList
-
-    # 画像の中央位置を取得
-    @classmethod
-    def getCenter(cls):
-        return cls.__centerLat, cls.__centerLon
 
     # テンプレートのJS部分に渡すディクショナリ生成
     @classmethod
@@ -170,11 +189,9 @@ class ImageFiles:
 
     # テンプレートの地図部分に渡すディクショナリ生成
     @classmethod
-    def getTemplateMap(cls, imgFiles, imgList, mapsJs):
+    def getTemplateMap(cls, mapsJs):
         templateMapValues = {
             "mapsjs": mapsJs,
-            "imgFiles": imgFiles,
-            "imgList": imgList,
         }
         return templateMapValues
 
@@ -190,7 +207,7 @@ class MainPage(webapp2.RequestHandler):
     mapsJs = template.render(mapsJsPath, ImageFiles.getTemplateJs(imgList, centerLat, centerLon))
     # テンプレートの地図部分をレンダリング
     mapsTempatePath = os.path.join(os.path.dirname(__file__), MAPS_TEMPLATE_PATH)
-    self.response.out.write(template.render(mapsTempatePath, ImageFiles.getTemplateMap(imgFiles, imgList, mapsJs)))
+    self.response.out.write(template.render(mapsTempatePath, ImageFiles.getTemplateMap(mapsJs)))
 
 app = webapp2.WSGIApplication([
     ("/maps", MainPage),
