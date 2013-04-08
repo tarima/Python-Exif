@@ -54,7 +54,7 @@ class Exif:
 
     # 時間から経度、緯度を算出する。
     @classmethod
-    def convertDegrees(cls, value):
+    def __convertDegrees(cls, value):
         # GPSTAGSでは、時、分、秒をそれぞれ分母と分子でもつListで返ってくる。
         date = float(value[0][0]) / float(value[0][1])
         minute = float(value[1][0]) / float(value[1][1])
@@ -65,11 +65,11 @@ class Exif:
 
     # 経度、緯度をGoogle Mapに利用する形式で取得
     @classmethod
-    def getPosition(cls, distance, direction, compType):
+    def __getPosition(cls, distance, direction, compType):
         posi = None
 
         if distance and direction:
-            posi = cls.convertDegrees(distance)
+            posi = cls.__convertDegrees(distance)
             if direction == compType:
                 posi = 0 - posi
 
@@ -88,29 +88,31 @@ class Exif:
             gpsLon    = cls.getKeyData(gpsInfo, EXIFGPSLON)     # 緯度
             gpsLonRef = cls.getKeyData(gpsInfo, EXIFGPSLONREF)  # 東経(E)、西経(W)
 
-            lat = cls.getPosition(gpsLat, gpsLatRef, "S");
-            lon = cls.getPosition(gpsLon, gpsLonRef, "W");
+            lat = cls.__getPosition(gpsLat, gpsLatRef, "S");
+            lon = cls.__getPosition(gpsLon, gpsLonRef, "W");
 
         return lat, lon
 
-class ImageFile:
+class ImageFiles:
+    __centerLat = 0
+    __centerLon = 0;
+
     # イメージファイルのパスを取得
     @classmethod
-    def getImgPath(cls):
+    def __getImgPath(cls):
         return os.getcwd() + DYNAMIC_IMG_PATH
 
     # イメージファイルを取得
     @classmethod
     def getImgFiles(cls):
-        imgFiles = dircache.listdir(cls.getImgPath())
+        imgFiles = dircache.listdir(cls.__getImgPath())
         #logging.debug("images files:" + imgFiles)
 
         return imgFiles
 
     # 日時フォーマット変換
     @classmethod
-    def changeDateTimeFormat(cls, exifDateTime):
-
+    def __changeDateTimeFormat(cls, exifDateTime):
         # YYYY:MM:DD hh:mm:ss --> WWW MMM DD hh:mm:ss YYYY
         tmp = exifDateTime.replace(" ", ":")
         params = tmp.split(":")
@@ -122,18 +124,16 @@ class ImageFile:
     @classmethod
     def getImgList(cls, imgFiles):
         imgList = []
-        imgPath = cls.getImgPath()
-        centerLat = 0
-        centerLon = 0;
+        imgPath = cls.__getImgPath()
 
         for imgFile in imgFiles:
             image = Image.open(imgPath + imgFile)
             exifData = Exif.getExifData(image)                                              # Exifデータ取得
-            datetime = cls.changeDateTimeFormat(Exif.getKeyData(exifData, EXIFDATETIME))    # 日時取得
+            datetime = cls.__changeDateTimeFormat(Exif.getKeyData(exifData, EXIFDATETIME))    # 日時取得
             lat,lon = Exif.getLatAndLon(exifData)                                           # 位置取得
             imgTitle = Exif.getKeyData(exifData, EXIFIMAGEDESCRIPTION)                      # タイトル取得
-            centerLat += lat
-            centerLon += lon
+            cls.__centerLat += lat
+            cls.__centerLon += lon
             # 画像情報のディクショナリ作成
             imageInfo = {
                 "imgpath": IMG_DIR + imgFile,
@@ -145,9 +145,14 @@ class ImageFile:
             logging.debug(imageInfo)
             imgList.append(imageInfo)
 
-        centerLat /= len(imgFiles)
-        centerLon /= len(imgFiles)
-        return imgList, centerLat, centerLon
+        cls.__centerLat /= len(imgFiles)
+        cls.__centerLon /= len(imgFiles)
+        return imgList
+
+    # 画像の中央位置を取得
+    @classmethod
+    def getCenter(cls):
+        return cls.__centerLat, cls.__centerLon
 
     # テンプレートのJS部分に渡すディクショナリ生成
     @classmethod
@@ -173,14 +178,15 @@ class MainPage(webapp2.RequestHandler):
   def get(self):
     logging.getLogger().setLevel(logging.DEBUG)
 
-    imgFiles = ImageFile.getImgFiles()
-    imgList, centerLat, centerLon = ImageFile.getImgList(imgFiles)
+    imgFiles = ImageFiles.getImgFiles()
+    imgList = ImageFiles.getImgList(imgFiles)
+    centerLat, centerLon = ImageFiles.getCenter()
     # テンプレートのJS部分をレンダリング
     mapsJsPath = os.path.join(os.path.dirname(__file__), JS_TEMPLATE_PATH)
-    mapsJs = template.render(mapsJsPath, ImageFile.getTemplateJs(imgList, centerLat, centerLon))
+    mapsJs = template.render(mapsJsPath, ImageFiles.getTemplateJs(imgList, centerLat, centerLon))
     # テンプレートの地図部分をレンダリング
     mapsTempatePath = os.path.join(os.path.dirname(__file__), MAPS_TEMPLATE_PATH)
-    self.response.out.write(template.render(mapsTempatePath, ImageFile.getTemplateMap(imgFiles, imgList, mapsJs)))
+    self.response.out.write(template.render(mapsTempatePath, ImageFiles.getTemplateMap(imgFiles, imgList, mapsJs)))
 
 app = webapp2.WSGIApplication([
     ("/maps", MainPage),
