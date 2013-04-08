@@ -125,15 +125,16 @@ class ImageFiles:
     def getImgList(cls, imgFiles):
         imgList = []
         imgPath = cls.__getImgPath()
+        centerLatCal = 0
+        centerLotCal = 0
 
         for imgFile in imgFiles:
+            # 画像位置情報の取得
             image = Image.open(imgPath + imgFile)
             exifData = Exif.getExifData(image)                                              # Exifデータ取得
             datetime = cls.__changeDateTimeFormat(Exif.getKeyData(exifData, EXIFDATETIME))    # 日時取得
             lat,lon = Exif.getLatAndLon(exifData)                                           # 位置取得
             imgTitle = Exif.getKeyData(exifData, EXIFIMAGEDESCRIPTION)                      # タイトル取得
-            cls.__centerLat += lat
-            cls.__centerLon += lon
             # 画像情報のディクショナリ作成
             imageInfo = {
                 "imgpath": IMG_DIR + imgFile,
@@ -144,9 +145,12 @@ class ImageFiles:
             }
             logging.debug(imageInfo)
             imgList.append(imageInfo)
+            # 画像中央位置の計算
+            centerLatCal += lat
+            centerLotCal += lon
 
-        cls.__centerLat /= len(imgFiles)
-        cls.__centerLon /= len(imgFiles)
+        cls.__centerLat = centerLatCal/len(imgFiles)
+        cls.__centerLon = centerLotCal/len(imgFiles)
         return imgList
 
     # 画像の中央位置を取得
