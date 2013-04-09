@@ -94,8 +94,6 @@ class Exif:
         return lat, lon
 
 class ImageFiles:
-    __centerLat = 0
-    __centerLon = 0;
     __east = 0;     # 東
     __west = 300;   # 西
     __south = 300;  # 南
@@ -138,7 +136,7 @@ class ImageFiles:
 
     # 東西南北の決定
     @classmethod
-    def __getFourWinds(cls, lat, lon):
+    def __compareLatLon(cls, lat, lon):
         if(lat > cls.__north):
             cls.__north = lat # 最北
         if(lat < cls.__south):
@@ -151,9 +149,7 @@ class ImageFiles:
     # 画像の中央位置を取得
     @classmethod
     def getCenter(cls):
-        cls.__centerLat = (cls.__north + cls.__south)/2
-        cls.__centerLon = (cls.__east + cls.__west)/2
-        return cls.__centerLat, cls.__centerLon
+        return (cls.__north + cls.__south)/2, (cls.__east + cls.__west)/2
 
     # イメージリスト取得
     @classmethod
@@ -174,7 +170,7 @@ class ImageFiles:
             logging.debug(imageInfo)
             imgList.append(imageInfo)
             # 東西南北の決定
-            cls.__getFourWinds(lat, lon)
+            cls.__compareLatLon(lat, lon)
         return imgList
 
     # テンプレートのJS部分に渡すディクショナリ生成
