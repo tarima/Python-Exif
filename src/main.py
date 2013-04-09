@@ -19,6 +19,7 @@ EXIFGPSLATREF = "GPSLatitudeRef"
 EXIFGPSLON = "GPSLongitude"
 EXIFGPSLONREF = "GPSLongitudeRef"
 EXIFIMAGEDESCRIPTION = "ImageDescription"
+EXIFUSERCOMMENT = "Artist"
 DYNAMIC_IMG_PATH = "/src/imgs/"
 IMG_DIR = "img/"
 JS_TEMPLATE_PATH = "../template/maps_js.html"
@@ -124,13 +125,14 @@ class ImageFiles:
 
     # 画像情報のディクショナリ作成
     @classmethod
-    def __getImageInfo(cls, imgFile, datetime, imgTitle, lat, lon):
+    def __getImageInfo(cls, imgFile, datetime, imgTitle, lat, lon, userComment):
         imageInfoValues = {
                 "imgpath": IMG_DIR + imgFile,
                 "datetime": datetime,
                 "lat": lat,
                 "lon": lon,
-                "imgtitle": imgTitle
+                "imgtitle": imgTitle,
+                "userComment": userComment
         }
         return imageInfoValues
 
@@ -166,7 +168,8 @@ class ImageFiles:
             datetime = cls.__changeDateTimeFormat(Exif.getKeyData(exifData, EXIFDATETIME))  # 日時取得
             lat,lon = Exif.getLatAndLon(exifData)                                           # 位置取得
             imgTitle = Exif.getKeyData(exifData, EXIFIMAGEDESCRIPTION)                      # タイトル取得
-            imageInfo = cls.__getImageInfo(imgFile, datetime, imgTitle, lat, lon)           # 画像情報のディクショナリ作成
+            userComment = Exif.getKeyData(exifData, EXIFUSERCOMMENT)                        # ユーザーコメント取得
+            imageInfo = cls.__getImageInfo(imgFile, datetime, imgTitle, lat, lon, userComment)  # 画像情報のディクショナリ作成
             logging.debug(imageInfo)
             imgList.append(imageInfo)
             # 東西南北の決定

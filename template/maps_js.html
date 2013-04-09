@@ -15,7 +15,7 @@ function showInfoWindow(marker, infoWindowOpts) {
 }
 
 // マーカー表示
-function showMarker(lat, lon, dateTime, imgTitle, imgPath) {
+function showMarker(lat, lon, dateTime, imgTitle, imgPath, userComment) {
 
 	var mapLatLng = new google.maps.LatLng(lat, lon);
 	var marker = new google.maps.Marker({
@@ -26,7 +26,7 @@ function showMarker(lat, lon, dateTime, imgTitle, imgPath) {
 	});
 	// マーカーに関連付けて表示するWindowのオプションを作成
 	var infoWindowOpts = {
-		content: createInfoViewContent(dateTime, imgTitle, imgPath),
+		content: createInfoViewContent(dateTime, imgTitle, imgPath, userComment),
 		positon: mapLatLng
 	};
 	showInfoWindow(marker, infoWindowOpts);
@@ -47,17 +47,17 @@ function createMapObj(centerLat, centerLon) {
 }
 
 // Mapオブジェクト作成
-function createInfoViewContent(dateTime, imgTitle, imgPath) {
+function createInfoViewContent(dateTime, imgTitle, imgPath, userComment) {
 	// 情報Windowを編集する場合は、ここを変更する。
 	// 現在は日時とタイトル、写真を表示するようにしている。
-	return htmlContent = "<strong>" + imgTitle + "</strong><br>" + dateTime +"<br><a href='" + imgPath + "' Target='_blank'><img src='" + imgPath + "' Width='73.5' Height='98' align='left'></a></div>";
+	return htmlContent = "<strong>" + imgTitle + "</strong><br>" + dateTime +"<br><a href='" + imgPath + "' Target='_blank'><img src='" + imgPath + "' Width='73.5' Height='98' align='left'></a>"+ userComment;
 }
 
 function init(){
 	{% if imgList %}
 		createMapObj({{centerLat}}, {{centerLon}});
 		{% for image in imgList %}
-			showMarker({{image.lat}}, {{image.lon}}, "{{image.datetime}}", "{{image.imgtitle}}", "{{image.imgpath}}");
+			showMarker({{image.lat}}, {{image.lon}}, "{{image.datetime}}", "{{image.imgtitle}}", "{{image.imgpath}}", "{{image.userComment}}");
 		{% endfor %}
 	{% else %}
 		document.write("Not Photo...");
